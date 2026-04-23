@@ -1,0 +1,238 @@
+class Mug {
+  String name;
+  int amount;
+  Mug(this.name, this.amount);
+}
+
+class Person {
+  String name;
+  Person(this.name);
+
+  void drink(Mug mug, int ml) {
+    mug.amount -= ml;
+    print("$name пьёт из ${mug.name}, осталось ${mug.amount} мл");
+  }
+}
+
+class Wardrobe {
+  List<String> items = [];
+
+  void put(String item) {
+    items.add(item);
+    print("Положили: $item");
+  }
+
+  void take(String item) {
+    items.remove(item);
+    print("Забрали: $item");
+  }
+}
+
+class Plate {
+  int weight;
+  Plate(this.weight);
+}
+
+class Barbell {
+  int maxLoad;
+  List<Plate> left = [];
+  List<Plate> right = [];
+  Barbell(this.maxLoad);
+
+  void addLeft(Plate p) {
+    left.add(p);
+    print("Слева добавлен блин ${p.weight} кг");
+  }
+
+  void addRight(Plate p) {
+    right.add(p);
+    print("Справа добавлен блин ${p.weight} кг");
+  }
+}
+
+class CurrencyConverter {
+  String from;
+  String to;
+  double rate;
+  CurrencyConverter(this.from, this.to, this.rate);
+
+  void convert(double amount) {
+    print("$amount $from = ${amount * rate} $to");
+  }
+}
+
+class Garage<T> {
+  List<T> cars = [];
+
+  void add(T car) {
+    cars.add(car);
+    print("Добавлено: $car");
+  }
+
+  void remove(T car) {
+    cars.remove(car);
+    print("Убрано: $car");
+  }
+}
+
+class MyNumber {
+  int value;
+  MyNumber(this.value);
+
+  MyNumber operator +(MyNumber other) => MyNumber(value + other.value);
+  MyNumber operator -(MyNumber other) => MyNumber(value - other.value);
+  MyNumber operator *(MyNumber other) => MyNumber(value * other.value);
+  MyNumber operator /(MyNumber other) => MyNumber(value ~/ other.value);
+
+  void info() => print("Значение: $value");
+}
+
+enum CarState { stop, drive, turn }
+
+class Car {
+  String brand;
+  CarState state = CarState.stop;
+  Car(this.brand);
+
+  void stop() { state = CarState.stop; print("$brand: стоп"); }
+  void drive() { state = CarState.drive; print("$brand: едет"); }
+  void turn() { state = CarState.turn; print("$brand: поворот"); }
+}
+
+abstract class Shape {
+  double area();
+  void info() => print("Площадь: ${area()}");
+}
+
+class Rectangle extends Shape {
+  double w, h;
+  Rectangle(this.w, this.h);
+  @override
+  double area() => w * h;
+}
+
+class Triangle extends Shape {
+  double base, height;
+  Triangle(this.base, this.height);
+  @override
+  double area() => 0.5 * base * height;
+}
+
+class Circle extends Shape {
+  double r;
+  static double pi = 3.14;
+  Circle(this.r);
+  @override
+  double area() => pi * r * r;
+}
+
+class NumberConverter {
+  int value;
+  NumberConverter(this.value);
+
+  void toHex() {
+    String digits = "0123456789ABCDEF";
+    int n = value;
+    String res = "";
+    while (n > 0) { res = digits[n % 16] + res; n ~/= 16; }
+    print("HEX: $res");
+  }
+
+  void toOctal() {
+    int n = value;
+    String res = "";
+    while (n > 0) { res = "${n % 8}" + res; n ~/= 8; }
+    print("OCT: $res");
+  }
+}
+
+class ShapeList {
+  List<Shape> shapes = [];
+
+  void add(Shape s) => shapes.add(s);
+
+  void maxArea() {
+    Shape max = shapes[0];
+    for (int i = 1; i < shapes.length; i++) {
+      if (shapes[i].area() > max.area()) max = shapes[i];
+    }
+    print("Макс площадь: ${max.area()}");
+  }
+}
+
+abstract class Cutlery {
+  String name;
+  Cutlery(this.name);
+  void use();
+}
+
+class Fork extends Cutlery {
+  Fork() : super("Вилка");
+  @override
+  void use() => print("Использую вилку");
+}
+
+class Knife extends Cutlery {
+  Knife() : super("Нож");
+  @override
+  void use() => print("Использую нож");
+}
+
+class Table {
+  List<Cutlery> items = [];
+
+  void put(Cutlery c) { items.add(c); print("Поставили: ${c.name}"); }
+  void take(Cutlery c) { items.remove(c); print("Убрали: ${c.name}"); }
+}
+
+void main() {
+  var mug = Mug("Кружка", 300);
+  var person = Person("Иван");
+  person.drink(mug, 100);
+
+  var wardrobe = Wardrobe();
+  wardrobe.put("Свитер");
+  wardrobe.take("Свитер");
+
+  var barbell = Barbell(100);
+  barbell.addLeft(Plate(20));
+  barbell.addRight(Plate(20));
+
+  var converter = CurrencyConverter("USD", "EUR", 0.92);
+  converter.convert(100);
+
+  var garage = Garage<String>();
+  garage.add("Toyota");
+  garage.remove("Toyota");
+
+  var a = MyNumber(10);
+  var b = MyNumber(5);
+  (a + b).info();
+  (a - b).info();
+  (a * b).info();
+  (a / b).info();
+
+  var car = Car("BMW");
+  car.drive();
+  car.turn();
+  car.stop();
+
+  Rectangle(4, 5).info();
+  Triangle(3, 6).info();
+  Circle(7).info();
+
+  var num = NumberConverter(255);
+  num.toHex();
+  num.toOctal();
+
+  var list = ShapeList();
+  list.add(Rectangle(4, 5));
+  list.add(Circle(3));
+  list.maxArea();
+
+  var table = Table();
+  var fork = Fork();
+  table.put(fork);
+  fork.use();
+  table.take(fork);
+}
