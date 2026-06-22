@@ -1,0 +1,77 @@
+from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, func
+from sqlalchemy.orm import declarative_base, Session
+
+engine = create_engine("sqlite:///library.db", echo=True)
+print(engine)
+
+Base = declarative_base()
+
+class Author(Base):
+    __tablename__ = 'authors'
+    id         = Column(Integer, primary_key=True)
+    name       = Column(String(100))
+    birth_year = Column(Integer)
+
+
+class Book(Base):
+    __tablename__ = 'books'
+    id        = Column(Integer, primary_key=True)
+    title     = Column(String(200))
+    year      = Column(Integer)
+    author_id = Column(Integer, ForeignKey('authors.id'))
+
+
+Base.metadata.create_all(engine)
+
+with Session(engine) as session:
+
+    a1 = Author(name='Джоан Роулинг',   birth_year=1965)
+    a2 = Author(name='Джон Толкин',     birth_year=1892)
+    a3 = Author(name='Александр Пушкин', birth_year=1799)
+    session.add_all([a1, a2, a3])
+    session.flush()
+
+    b1 = Book(title='Гарри Поттер и философский камень', year=1997, author_id=a1.id)
+    b2 = Book(title='Гарри Поттер и тайная комната',     year=1998, author_id=a1.id)
+    b3 = Book(title='Хоббит',                            year=1937, author_id=a2.id)
+    b4 = Book(title='Властелин колец',                   year=1954, author_id=a2.id)
+    b5 = Book(title='Евгений Онегин',                    year=1833, author_id=a3.id)
+    session.add_all([b1, b2, b3, b4, b5])
+    session.commit()
+
+    print("\nВсе авторы")
+    for a in session.query(Author).all():
+        print(a.name)
+
+    author_to_update = session.query(Author).filter(Author.name == 'Джоан Роулинг').first()
+    author_to_update.name = 'Дж.К. Роулинг'
+    session.commit()
+    print("\nИмя автора изменено")
+    print(session.query(Author).filter(Author.id == author_to_update.id).first().name)
+
+    # Удалить одну книгу
+    book_to_delete = session.query(Book).filter(Book.title == 'Гарри Поттер и тайная комната').first()
+    session.delete(book_to_delete)
+    session.commit()
+    print("\nКнига 'Гарри Поттер и тайная комната' удалена")
+
+    # Все книги, отсортированные по году (от новых к старым)
+    print("\nКниги по году (новые => старые)")
+    for b in session.query(Book).order_by(Book.year.desc()).all():
+        print(f"{b.title} ({b.year})")
+
+    print("\nКниги после 1950 года")
+    for b in session.query(Book).filter(Book.year > 1950).all():
+        print(f"{b.title} ({b.year})")
+
+    print("\nПоиск автора по имени")
+    found = session.query(Author).filter(Author.name == 'Джон Толкин').first()
+    print(found.name, found.birth_year)
+
+    print("\nКоличество книг")
+    count = session.query(func.count(Book.id)).scalar()
+    print(count)
+
+    print("\nПервые 3 книги в алфавитном порядке")
+    for b in session.query(Book).order_by(Book.title).limit(3).all():
+        print(b.title)
